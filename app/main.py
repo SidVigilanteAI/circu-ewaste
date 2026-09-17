@@ -1,4 +1,5 @@
 import sys
+import os
 from pathlib import Path
 
 # Add project root directory to sys.path so 'app' package is resolvable
@@ -6,6 +7,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Dict, Any
 
@@ -30,7 +33,7 @@ app = FastAPI(
     version="2.1.0"
 )
 
-# Enable CORS for Next.js and all local origins
+# Enable CORS for Next.js and all origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -131,6 +134,25 @@ def get_nearby_centers(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Nearby centers lookup failed: {str(e)}")
 
+# --- Unified Single-Container Mounting for Static Next.js Export ---
+static_dir = Path(__file__).resolve().parent.parent / "frontend" / "out"
+if static_dir.exists() and (static_dir / "index.html").exists():
+    if (static_dir / "_next").exists():
+        app.mount("/_next", StaticFiles(directory=str(static_dir / "_next")), name="next_static")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        if full_path.startswith("api/") or full_path == "health":
+            raise HTTPException(status_code=404, detail="API endpoint not found")
+        file_path = static_dir / full_path
+        if file_path.is_file():
+            return FileResponse(file_path)
+        index_file = static_dir / "index.html"
+        if index_file.is_file():
+            return FileResponse(index_file)
+        raise HTTPException(status_code=404, detail="Page not found")
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=True)

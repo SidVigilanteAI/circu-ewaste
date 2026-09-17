@@ -45,7 +45,17 @@ const NearbyMapVisualizer = dynamic(
   }
 );
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000";
+export const getApiBase = () => {
+  if (process.env.NEXT_PUBLIC_API_BASE) {
+    return process.env.NEXT_PUBLIC_API_BASE;
+  }
+  if (typeof window !== "undefined" && window.location && window.location.origin) {
+    return window.location.origin;
+  }
+  return "http://127.0.0.1:8000";
+};
+
+export const API_BASE = typeof window !== "undefined" ? getApiBase() : (process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000");
 
 interface DeviceCandidate {
   brand: string;

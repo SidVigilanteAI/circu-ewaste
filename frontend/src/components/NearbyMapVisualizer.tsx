@@ -335,7 +335,9 @@ export default function NearbyMapVisualizer({
     setSearchMsg(null);
 
     try {
-      const apiBase = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000";
+      const apiBase =
+        process.env.NEXT_PUBLIC_API_BASE ||
+        (typeof window !== "undefined" && window.location?.origin ? window.location.origin : "http://127.0.0.1:8000");
       const res = await fetch(
         `${apiBase}/api/nearby-centers?pincode=${encodeURIComponent(cleanPin)}&brand=${encodeURIComponent(deviceBrand)}&category=${encodeURIComponent(deviceCategory)}`
       );
