@@ -1,0 +1,10 @@
+# Ignore Python backend from Vercel function bundling
+app/
+ui/
+requirements.txt
+*.jpeg
+*.jpg
+*.png
+.venv/
+scratch/
+README.md

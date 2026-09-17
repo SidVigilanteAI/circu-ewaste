@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+pydantic
+duckduckgo-search
+langchain
+langchain-google-genai
+langchain-community
+python-dotenv
+requests
+python-multipart
+rapidocr-onnxruntime
+opencv-python-headless
+pymupdf
+numpy
